@@ -1,0 +1,184 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "AWS-Study CloudFormation"
+
+Parameters:
+  #KeyPair
+  KeyName:
+    Description: "AWS-Study-EC2 KeyPair"
+    Type: AWS::EC2::KeyPair::KeyName
+
+Resources:
+  # IGW
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: AWS-Study-IGW
+
+  AttachIGW:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref AWSStudyVPC
+      InternetGatewayId: !Ref InternetGateway
+
+  # VPC
+  AWSStudyVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags: 
+        - Key: Name
+          Value: AWS-Study-VPC
+
+  # Subnet
+  PublicSubnetAZ1a:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select 
+        - 0
+        - Fn::GetAZs: !Ref AWS::Region
+      CidrBlock: 10.0.0.0/20
+      MapPublicIpOnLaunch: true
+      Tags: 
+        - Key: Name
+          Value: AWS-Study-subnet-public1
+      VpcId: !Ref AWSStudyVPC
+
+  AssoPubSub1aRT:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PubSubrtb
+      SubnetId: !Ref PublicSubnetAZ1a
+
+  PrivateSubnetAZ1a:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select 
+        - 0
+        - Fn::GetAZs: !Ref AWS::Region
+      CidrBlock: 10.0.128.0/20
+      MapPublicIpOnLaunch: false
+      Tags: 
+        - Key: Name
+          Value: AWS-Study-subnet-private1
+      VpcId: !Ref AWSStudyVPC
+
+  AssoPvtSub1aRT:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PvtSub1rtb
+      SubnetId: !Ref PrivateSubnetAZ1a
+
+  PublicSubnetAZ1c:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select 
+        - 1
+        - Fn::GetAZs: !Ref AWS::Region
+      CidrBlock: 10.0.16.0/20
+      MapPublicIpOnLaunch: true
+      Tags: 
+        - Key: Name
+          Value: AWS-Study-subnet-public2
+      VpcId: !Ref AWSStudyVPC
+
+  AssoPubSub1cRT:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PubSubrtb
+      SubnetId: !Ref PublicSubnetAZ1c
+
+  PrivateSubnetAZ1c:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select 
+        - 1
+        - Fn::GetAZs: !Ref AWS::Region
+      CidrBlock: 10.0.144.0/20
+      MapPublicIpOnLaunch: false
+      Tags: 
+        - Key: Name
+          Value: AWS-Study-subnet-private2
+      VpcId: !Ref AWSStudyVPC
+
+  AssoPvtSub1cRT:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PvtSub2rtb
+      SubnetId: !Ref PrivateSubnetAZ1c
+
+  # rtb
+  PubSubrtb:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref AWSStudyVPC
+      Tags:
+        - Key: Name
+          Value: AWS-Study-rtb-public
+
+  PvtSub1rtb:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref AWSStudyVPC
+      Tags:
+        - Key: Name
+          Value: AWS-Study-rtb-private1
+
+  PvtSub2rtb:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref AWSStudyVPC
+      Tags:
+        - Key: Name
+          Value: AWS-Study-rtb-private2
+
+  # Route
+  PubSubInternet:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PubSubrtb
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  # SecurityGroup
+  AWSStudyEC2SG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Allow SSH,http,https"
+      GroupName: AWS-Study-EC2-SG
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      VpcId: !Ref AWSStudyVPC
+
+  # EC2
+  AWSStudyEC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      AvailabilityZone: !Select 
+        - 0
+        - Fn::GetAZs: !Ref AWS::Region
+      DisableApiTermination: true
+      ImageId: ami-03598bf9d15814511
+      InstanceType: t2.micro
+      KeyName: !Ref KeyName
+      SecurityGroupIds:
+        - !Ref AWSStudyEC2SG
+      SubnetId: !Ref PublicSubnetAZ1a
+      Tags:
+        - Key: Name
+          Value: AWS-Study-EC2
+      Tenancy: default
