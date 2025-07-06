@@ -7,6 +7,17 @@ Parameters:
     Description: "AWS-Study-EC2 KeyPair"
     Type: AWS::EC2::KeyPair::KeyName
 
+  #ResourcesPrefix
+  ResourcesPrefix:
+    Description: "Resources-Name Prefix"
+    Type: String
+    Default: AWS-Study
+
+  #MyIP
+  MyIP:
+    Description: "Allow SSH"
+    Type: String
+
 Resources:
   # IGW
   InternetGateway:
@@ -14,7 +25,7 @@ Resources:
     Properties:
       Tags:
         - Key: Name
-          Value: AWS-Study-IGW
+          Value: !Sub "${ResourcesPrefix}-IGW"
 
   AttachIGW:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -31,7 +42,7 @@ Resources:
       EnableDnsSupport: true
       Tags: 
         - Key: Name
-          Value: AWS-Study-VPC
+          Value: !Sub "${ResourcesPrefix}-VPC"
 
   # Subnet
   PublicSubnetAZ1a:
@@ -44,7 +55,7 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags: 
         - Key: Name
-          Value: AWS-Study-subnet-public1
+          Value: !Sub "${ResourcesPrefix}-subnet-public1"
       VpcId: !Ref AWSStudyVPC
 
   AssoPubSub1aRT:
@@ -63,7 +74,7 @@ Resources:
       MapPublicIpOnLaunch: false
       Tags: 
         - Key: Name
-          Value: AWS-Study-subnet-private1
+          Value: !Sub "${ResourcesPrefix}-subnet-private1"
       VpcId: !Ref AWSStudyVPC
 
   AssoPvtSub1aRT:
@@ -82,7 +93,7 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags: 
         - Key: Name
-          Value: AWS-Study-subnet-public2
+          Value: !Sub "${ResourcesPrefix}-subnet-public2"
       VpcId: !Ref AWSStudyVPC
 
   AssoPubSub1cRT:
@@ -101,7 +112,7 @@ Resources:
       MapPublicIpOnLaunch: false
       Tags: 
         - Key: Name
-          Value: AWS-Study-subnet-private2
+          Value: !Sub "${ResourcesPrefix}-subnet-private2"
       VpcId: !Ref AWSStudyVPC
 
   AssoPvtSub1cRT:
@@ -117,7 +128,7 @@ Resources:
       VpcId: !Ref AWSStudyVPC
       Tags:
         - Key: Name
-          Value: AWS-Study-rtb-public
+          Value: !Sub "${ResourcesPrefix}-rtb-public"
 
   PvtSub1rtb:
     Type: AWS::EC2::RouteTable
@@ -125,7 +136,7 @@ Resources:
       VpcId: !Ref AWSStudyVPC
       Tags:
         - Key: Name
-          Value: AWS-Study-rtb-private1
+          Value: !Sub "${ResourcesPrefix}-rtb-private1"
 
   PvtSub2rtb:
     Type: AWS::EC2::RouteTable
@@ -133,7 +144,7 @@ Resources:
       VpcId: !Ref AWSStudyVPC
       Tags:
         - Key: Name
-          Value: AWS-Study-rtb-private2
+          Value: !Sub "${ResourcesPrefix}-rtb-private2"
 
   # Route
   PubSubInternet:
@@ -148,12 +159,12 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: "Allow SSH,http,https"
-      GroupName: AWS-Study-EC2-SG
+      GroupName: !Sub "${ResourcesPrefix}-EC2-SG"
       SecurityGroupIngress: 
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
-          CidrIp: 0.0.0.0/0
+          CidrIp: !Sub "${MyIP}/32"
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
@@ -180,5 +191,5 @@ Resources:
       SubnetId: !Ref PublicSubnetAZ1a
       Tags:
         - Key: Name
-          Value: AWS-Study-EC2
+          Value: !Sub "${ResourcesPrefix}-EC2"
       Tenancy: default
