@@ -227,7 +227,7 @@ Resources:
       AvailabilityZone: !Select 
         - 0
         - Fn::GetAZs: !Ref AWS::Region
-      DisableApiTermination: true
+      DisableApiTermination: false
       ImageId: ami-03598bf9d15814511
       InstanceType: t2.micro
       KeyName: !Ref KeyName
@@ -256,7 +256,6 @@ Resources:
       DBInstanceClass: db.t4g.micro
       StorageType: gp2
       AllocatedStorage: 20
-      MaxAllocatedStorage: 20
       DBSubnetGroupName: !Ref AWSStudyRDSSubnetGroup
       VPCSecurityGroups:
         - !Ref AWSStudyRDSSG
@@ -271,7 +270,7 @@ Resources:
         - slowquery
       PubliclyAccessible: false
       MultiAZ: false
-      DeletionProtection: true
+      DeletionProtection: false
       BackupRetentionPeriod: 1
 
   # RDSDBSubnetGroup
