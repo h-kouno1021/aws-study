@@ -31,10 +31,6 @@ Parameters:
     NoEcho: true
     AllowedPattern: '^[\x21-\x7E&&[^/@"]]{8,41}$'
 
-  DBSubnetGroupName:
-    Type: String
-    Default: "rds-ec2-db-subnet-group-4"
-
   DBName:
     Description: "Must contain 1 to 64 letters or numbers."
     Type: String
@@ -278,8 +274,8 @@ Resources:
   AWSStudyRDSSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
-      DBSubnetGroupDescription: !Sub "${ResourcesPrefix} DBSubnetGroup"
-      DBSubnetGroupName: !Ref DBSubnetGroupName
+      DBSubnetGroupDescription: "Created from the CloudFormation"
+      DBSubnetGroupName: !Sub "subnet-group-${ResourcesPrefix}-rds-cfn"
       SubnetIds:
         - !Ref PrivateSubnetAZ1a
         - !Ref PrivateSubnetAZ1c
