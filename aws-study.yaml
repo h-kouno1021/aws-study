@@ -28,6 +28,7 @@ Parameters:
   RDSMasterUserPassword:
     Description: "Constraints: Must contain from 8 to 41 characters."
     Type: String
+    NoEcho: true
     AllowedPattern: '^[\x21-\x7E&&[^/@"]]{8,41}$'
 
   DBSubnetGroupName:
@@ -198,7 +199,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: 8080
           ToPort: 8080
-          CidrIp: 0.0.0.0/0
+          SourceSecurityGroupId: !Ref AWSStudyELBSecurityGroup
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
